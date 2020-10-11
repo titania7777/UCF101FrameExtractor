@@ -11,11 +11,11 @@ args = parser.parse_args()
 
 ray.init(num_cpus=8)
 
-videos_path_list = glob.glob(args.video_path + '*.avi')
+videos_path_list = glob.glob(args.videos_path + '*.avi')
 print("will start extract frames from {} videos...".format(len(videos_path_list)))
 
 # check directory
-assert os.path.exists(args.frames_path) is False, "{} directory is alreay exist!!".format(args.frames_path)
+assert os.path.exists(args.frames_path) is False, "'{}' directory is alreay exist!!".format(args.frames_path)
 os.makedirs(args.frames_path)
 
 @ray.remote
