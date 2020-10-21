@@ -1,22 +1,24 @@
 import os
 import av
-import glob
+from glob import glob
 import ray
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--videos-path", type=str, default="./UCF101_videos/")
-parser.add_argument("--frames-path", type=str, default="./UCF101_frames/")
+parser.add_argument("--videos-path", type=str, default="../Data/UCF101/UCF101_videos/")
+parser.add_argument("--frames-path", type=str, default="../Data/UCF101/UCF101_frames/")
+parser.add_argument("--num-cpus", type=int, default=8)
 args = parser.parse_args()
 
-ray.init(num_cpus=8)
-
-videos_path_list = glob.glob(args.videos_path + '*.avi')
-print("will start extract frames from {} videos...".format(len(videos_path_list)))
-
 # check directory
-assert os.path.exists(args.frames_path) is False, "'{}' directory is alreay exist!!".format(args.frames_path)
+assert os.path.exists(args.frames_path) == False, "'{}' directory is alreay exist !!".format(args.frames_path)
 os.makedirs(args.frames_path)
+
+# init ray on local
+ray.init(num_cpus=args.num_cpus)
+
+videos_path_list = glob(os.path.join(args.videos_path, "*.avi"))
+print("will be start extract frames from {} videos...".format(len(videos_path_list)))
 
 @ray.remote
 def extractor(index, video_path):
