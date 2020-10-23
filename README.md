@@ -15,7 +15,7 @@ extract only frames
 frame_extractor.py --videos-path /path/to/videos --frames-path /path/to/save --num-cpus /number/of/cpus
 ```
 
-extract both (frames, flows)
+extract only optical flows
 ```
-frame_extractor.py --videos-path /path/to/videos --frames-path /path/to/save --flows-path /path/to/save --num-cpus /number/of/cpus --flow-mode
+frame_extractor.py --videos-path /path/to/videos --flows-path /path/to/save --num-cpus /number/of/cpus --flow-mode
 ```

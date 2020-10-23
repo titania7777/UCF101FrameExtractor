@@ -22,8 +22,12 @@ args = parser.parse_args()
 
 # check directory(videos_path, frames_path, flows_path)
 assert os.path.exists(args.videos_path) is True, "'{}' directory is not exist !!".format(args.videos_path)
-assert os.path.exists(args.frames_path) is False, "'{}' directory is already exist !!".format(args.frames_path)
-assert os.path.exists(args.flows_path) is False, "'{}' directory is already exist !!".format(args.flows_path)
+
+# only flow
+if args.flow_mode:
+    assert os.path.exists(args.flows_path) is False, "'{}' directory is already exist !!".format(args.flows_path)
+else:
+    assert os.path.exists(args.frames_path) is False, "'{}' directory is already exist !!".format(args.frames_path)
 
 # get videos path
 videos_path_list = glob(os.path.join(args.videos_path, "*"))
@@ -35,10 +39,6 @@ ray.init(num_cpus=args.num_cpus)
 def dense_optical_flow(index, video_path):
     frame_name = video_path.split("\\" if os.name == 'nt' else "/")[-1].split('.avi')[0]
     
-    # frame path
-    frame_path = os.path.join(args.frames_path, frame_name)
-    os.makedirs(frame_path)
-    
     # read video
     cap = cv2.VideoCapture(video_path)
     ret, frame_first = cap.read()
@@ -49,10 +49,7 @@ def dense_optical_flow(index, video_path):
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     print("{}/{} name: {} length: {}".format(index+1, len(videos_path_list), frame_name, length))
 
-    # save first frame
-    if not cv2.imwrite(os.path.join(frame_path, "0.jpg"), frame_first):
-        raise Exception("could not write frame !!")
-
+    # only flow
     if args.flow_mode:
         # flow path
         flow_path = os.path.join(args.flows_path, frame_name)
@@ -62,19 +59,23 @@ def dense_optical_flow(index, video_path):
         frame_prev_gray = cv2.cvtColor(frame_first, cv2.COLOR_BGR2GRAY)
         hsv = np.zeros_like(frame_first)
         hsv[..., 1] = 255
+    else:
+        # frame path
+        frame_path = os.path.join(args.frames_path, frame_name)
+        os.makedirs(frame_path)
+
+        # save first frame
+        if not cv2.imwrite(os.path.join(frame_path, "0.jpg"), frame_first):
+            raise Exception("could not write frame !!")
 
     for i in range(1, length):
         # read next frame
         ret, frame_next = cap.read()
         if ret == False:
             msg = "index '{}' of '{}' video read to fail !! skip this frame...".format(i, video_path)
-            errors.append(msg); print(msg)
             continue
-
-        # save next frame 
-        if not cv2.imwrite(os.path.join(frame_path, "{}.jpg".format(i)), frame_next):
-            raise Exception("could not write frame !!")
-
+        
+        # only flow
         if args.flow_mode:
             frame_next_gray = cv2.cvtColor(frame_next, cv2.COLOR_BGR2GRAY)
             # Computes a dense optical flow using the Gunnar Farneback's algorithm
@@ -85,5 +86,10 @@ def dense_optical_flow(index, video_path):
             hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
             cv2.imwrite(os.path.join(flow_path, "{}.jpg".format(i - 1)), cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR))
             frame_prev_gray = frame_next_gray
+        else:
+            # save next frame 
+            if not cv2.imwrite(os.path.join(frame_path, "{}.jpg".format(i)), frame_next):
+                raise Exception("could not write frame !!")
+    cap.release()
 
 ray.get([dense_optical_flow.remote(i, video_path) for i, video_path in enumerate(videos_path_list)])
