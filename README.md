@@ -7,8 +7,13 @@ this frame extractor supports optical flow(dense optical flow) also
 *   opencv-python>=4.4.0.44
 
 ## Usage
-
-download raw videos [Download UCF101.tar](https://www.dropbox.com/s/xhwkilwgytox0j2/UCF101.tar?dl=0) and decompress it
+example
+```
+$ wget --no-check-certificate https://www.crcv.ucf.edu/data/UCF101/UCF101.rar
+$ mkdir UCF101_videos
+$ unrar e UFC101.rar ./UCF101_videos
+$ python frame_extractor.py --videos-path ./UCF101_videos --frames-path ./UCF101_frames --num-cpus 8
+```
 
 extract only frames
 ```
