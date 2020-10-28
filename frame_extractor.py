@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--videos-path", type=str, default="../Data/UCF101/UCF101_videos/")
 parser.add_argument("--frames-path", type=str, default="./UCF101_frames/")
 parser.add_argument("--flows-path", type=str, default="./UCF101_flows/")
+parser.add_argument("--quality", type=int, default=50)
 parser.add_argument("--flow-mode", action="store_true")
 parser.add_argument("--num-cpus", type=int, default=8)
 parser.add_argument("--pyr-scale", type=float, default=0.5)
@@ -43,7 +44,7 @@ def dense_optical_flow(index, video_path):
     cap = cv2.VideoCapture(video_path)
     ret, frame_first = cap.read()
     if ret == False:
-        print("'{}' video read to fail !! skip this video...".format(video_path))
+        print("'{}' video reading failure !! skip this video...".format(video_path))
         return
 
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -65,14 +66,14 @@ def dense_optical_flow(index, video_path):
         os.makedirs(frame_path)
 
         # save first frame
-        if not cv2.imwrite(os.path.join(frame_path, "0.jpg"), frame_first):
+        if not cv2.imwrite(os.path.join(frame_path, "0.jpg"), frame_first, [int(cv2.IMWRITE_JPEG_QUALITY), args.quality]):
             raise Exception("could not write frame !!")
 
     for i in range(1, length):
         # read next frame
         ret, frame_next = cap.read()
         if ret == False:
-            msg = "index '{}' of '{}' video read to fail !! skip this frame...".format(i, video_path)
+            msg = "index '{}' of '{}' video reading failure !! skip this frame...".format(i, video_path)
             continue
         
         # only flow
@@ -84,11 +85,11 @@ def dense_optical_flow(index, video_path):
             mag, ang = cv2.cartToPolar(frame_flow[..., 0], frame_flow[..., 1])
             hsv[..., 0] = ang*180/np.pi/2
             hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
-            cv2.imwrite(os.path.join(flow_path, "{}.jpg".format(i - 1)), cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR))
+            cv2.imwrite(os.path.join(flow_path, "{}.jpg".format(i - 1)), cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR), [int(cv2.IMWRITE_JPEG_QUALITY), args.quality])
             frame_prev_gray = frame_next_gray
         else:
             # save next frame 
-            if not cv2.imwrite(os.path.join(frame_path, "{}.jpg".format(i)), frame_next):
+            if not cv2.imwrite(os.path.join(frame_path, "{}.jpg".format(i)), frame_next,  [int(cv2.IMWRITE_JPEG_QUALITY), args.quality]):
                 raise Exception("could not write frame !!")
     cap.release()
 

@@ -11,7 +11,7 @@ example
 ```
 $ wget --no-check-certificate https://www.crcv.ucf.edu/data/UCF101/UCF101.rar
 $ mkdir UCF101_videos
-$ unrar e UFC101.rar ./UCF101_videos
+$ unrar e UCF101.rar ./UCF101_videos
 $ python frame_extractor.py --videos-path ./UCF101_videos --frames-path ./UCF101_frames --num-cpus 8
 ```
 
