@@ -6,10 +6,10 @@ import cv2
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--videos-path", type=str, default="../Data/UCF101/UCF101_videos/")
+parser.add_argument("--videos-path", type=str, default="./UCF101_videos/")
 parser.add_argument("--frames-path", type=str, default="./UCF101_frames/")
 parser.add_argument("--flows-path", type=str, default="./UCF101_flows/")
-parser.add_argument("--quality", type=int, default=50)
+parser.add_argument("--quality", type=int, default=75)
 parser.add_argument("--flow-mode", action="store_true")
 parser.add_argument("--num-cpus", type=int, default=8)
 parser.add_argument("--pyr-scale", type=float, default=0.5)
